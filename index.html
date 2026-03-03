@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestione Fatture · Sub-Agenzie</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f4f2ee;
+  --bg2:      #ece9e3;
+  --surface:  #ffffff;
+  --border:   #dcd8d0;
+  --border2:  #cbc6bc;
+  --ink:      #1a1714;
+  --ink2:     #5a5550;
+  --ink3:     #9a948c;
+  --accent:   #1a5cff;
+  --accent-s: #e8eeff;
+  --green:    #0a8c5c;
+  --green-s:  #dcf4ec;
+  --amber:    #b85c00;
+  --amber-s:  #fff0e0;
+  --red:      #c0392b;
+  --red-s:    #fdecea;
+  --shadow:   0 2px 8px rgba(0,0,0,0.07), 0 0 1px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 0 1px rgba(0,0,0,0.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* subtle paper texture */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23f4f2ee'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23e8e4dd' opacity='0.5'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0;
+}
+
+.app { position:relative; z-index:1; max-width:1240px; margin:0 auto; padding:0 28px 80px; }
+
+/* ── HEADER ── */
+header {
+  padding: 28px 0 20px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 36px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap:16px;
+}
+
+.logo { display:flex; align-items:baseline; gap:10px; }
+
+.logo-title {
+  font-family: 'Fraunces', serif;
+  font-size: 26px; font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+
+.logo-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  background: var(--ink); color: #fff;
+  padding: 3px 10px; border-radius: 4px;
+}
+
+.header-stats { display:flex; gap:12px; flex-wrap:wrap; }
+
+.stat {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 6px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--ink2);
+  box-shadow: var(--shadow);
+}
+
+.stat b { color: var(--ink); font-weight: 600; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+
+.tab {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 10px 22px;
+  border: none; background: transparent; cursor: pointer;
+  color: var(--ink3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+  border-radius: 6px 6px 0 0;
+}
+
+.tab:hover { color: var(--ink); background: var(--bg2); }
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--surface);
+}
+
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.card-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  display: flex; align-items: center; justify-content: space-between; gap:12px; flex-wrap:wrap;
+}
+
+.card-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.card-body { padding: 24px; }
+
+/* ── FORM ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.field { display:flex; flex-direction:column; gap:5px; }
+
+label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--ink2);
+}
+
+input[type=text], input[type=number], input[type=date], select, textarea {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  padding: 9px 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26, 92, 255, 0.1);
+  background: #fff;
+}
+
+textarea { resize:vertical; min-height: 70px; }
+
+/* ── AGENZIE FORM BLOCKS ── */
+.agenzie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.ag-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.ag-block-head {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;
+}
+
+.ag-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+
+.ag-preview-total {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px; font-weight: 500;
+  color: var(--green);
+  background: var(--green-s);
+  padding: 3px 10px; border-radius: 20px;
+}
+
+.ag-codice {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; color: var(--ink3);
+  background: var(--bg2);
+  padding: 5px 10px; border-radius: 5px;
+  margin-top: 10px; word-break: break-all;
+  border: 1px solid var(--border);
+}
+
+/* ── BUTTONS ── */
+.btn { font-family:'DM Sans',sans-serif; font-weight:600; font-size:13px; padding:10px 22px; border-radius:8px; border:none; cursor:pointer; transition: all 0.15s; display:inline-flex; align-items:center; gap:6px; }
+
+.btn-primary   { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(26,92,255,0.25); }
+.btn-primary:hover { background: #0e4be0; transform:translateY(-1px); box-shadow:0 4px 16px rgba(26,92,255,0.3); }
+
+.btn-outline   { background: #fff; color: var(--ink); border: 1px solid var(--border2); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-ghost   { background: transparent; color: var(--ink2); border:1px solid transparent; font-size:12px; padding:7px 14px; }
+.btn-ghost:hover { background: var(--bg2); color: var(--ink); }
+
+.btn-danger  { background: var(--red-s); color: var(--red); border:1px solid #f0c0bb; font-size:12px; padding:7px 14px; }
+.btn-danger:hover { background: var(--red); color: #fff; }
+
+.btn-sm { padding:6px 14px; font-size:12px; }
+
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x:auto; }
+
+table { width:100%; border-collapse:collapse; font-size:13px; }
+
+thead { background: var(--bg2); }
+
+th {
+  font-family:'DM Mono',monospace;
+  font-size: 10px; letter-spacing:2px; text-transform:uppercase;
+  color: var(--ink3); padding: 12px 14px; text-align:left;
+  border-bottom: 2px solid var(--border); white-space:nowrap;
+}
+
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--ink2);
+}
+
+tr:last-child td { border-bottom:none; }
+tr:hover td { background: #fafaf8; }
+
+.td-main { font-weight:600; color:var(--ink); }
+.td-money { font-family:'DM Mono',monospace; font-weight:600; color:var(--green); font-size:14px; }
+.td-code { font-family:'DM Mono',monospace; font-size:10px; color:var(--ink3); max-width:200px; word-break:break-all; }
+
+/* ── BADGES ── */
+.badge {
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase;
+  padding:3px 10px; border-radius:20px; border:1px solid;
+  white-space:nowrap;
+}
+.badge-green { color:var(--green); border-color:#a8dfc8; background:var(--green-s); }
+.badge-amber { color:var(--amber); border-color:#f4c98a; background:var(--amber-s); }
+.badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+
+/* ── INLINE INPUTS ── */
+.inline-in {
+  background: var(--bg); border: 1px solid var(--border); border-radius:5px;
+  padding:5px 9px; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--ink);
+  outline:none; width:100%; min-width:100px;
+}
+.inline-in:focus { border-color:var(--accent); background:#fff; }
+
+.check-wrap { display:flex; align-items:center; gap:8px; }
+input[type=checkbox] { width:16px; height:16px; accent-color:var(--green); cursor:pointer; }
+
+/* ── TOTALE BAR ── */
+.totale-bar {
+  padding: 18px 24px;
+  background: var(--ink);
+  border-radius: 10px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  margin-top:20px;
+}
+.totale-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.5); }
+.totale-val {
+  font-family:'Fraunces',serif; font-size:28px; font-weight:700; color:#fff;
+}
+.totale-iva { font-family:'DM Mono',monospace; font-size:12px; color:rgba(255,255,255,0.5); }
+
+/* ── EMPTY STATE ── */
+.empty { text-align:center; padding:60px 20px; color:var(--ink3); font-size:13px; }
+.empty svg { opacity:0.25; margin-bottom:14px; }
+
+/* ── SECTION DIVIDER ── */
+.section-label {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--ink3); margin-bottom:14px; margin-top:24px;
+  display:flex; align-items:center; gap:10px;
+}
+.section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── FILTER ROW ── */
+.filter-row { display:flex; gap:8px; flex-wrap:wrap; }
+.f-btn {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase;
+  padding:5px 14px; border-radius:20px; border:1px solid var(--border);
+  background:#fff; color:var(--ink3); cursor:pointer; transition:all 0.15s;
+}
+.f-btn:hover, .f-btn.active { border-color:var(--accent); color:var(--accent); background:var(--accent-s); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100;
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  opacity:0; pointer-events:none; transition:opacity 0.2s;
+}
+.modal-overlay.open { opacity:1; pointer-events:all; }
+
+.modal {
+  background:#fff; border-radius:14px; box-shadow:var(--shadow-lg);
+  max-width:480px; width:100%; padding:28px;
+  transform:translateY(16px); transition:transform 0.2s;
+}
+.modal-overlay.open .modal { transform:translateY(0); }
+.modal-title { font-family:'Fraunces',serif; font-size:20px; font-weight:700; margin-bottom:20px; }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:28px; right:28px;
+  background:var(--ink); color:#fff;
+  font-family:'DM Mono',monospace; font-size:12px;
+  padding:12px 22px; border-radius:8px; box-shadow:var(--shadow-lg);
+  z-index:999; opacity:0; transform:translateY(12px); pointer-events:none;
+  transition:all 0.25s;
+}
+.toast.show { opacity:1; transform:translateY(0); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.animate { animation: fadeUp 0.25s ease forwards; }
+
+@media(max-width:700px) {
+  .header-stats{display:none}
+  .tabs .tab { padding:8px 14px; font-size:12px; }
+  .totale-val { font-size:22px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-title">Fatture Sub-Agenzie</div>
+    <div class="logo-badge">Gestione</div>
+  </div>
+  <div class="header-stats">
+    <div class="stat">Emesse: <b id="s-emesse">0</b></div>
+    <div class="stat">Inviate: <b id="s-inviate">0</b></div>
+    <div class="stat">In attesa: <b id="s-attesa">0</b></div>
+    <div class="stat">Totale: <b id="s-totale">€ 0</b></div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('emissione', this)">▶ Nuova Emissione</button>
+  <button class="tab" onclick="switchTab('righe', this)">📄 Righe Emesse</button>
+  <button class="tab" onclick="switchTab('config', this)">⚙ Configurazione</button>
+</div>
+
+<!-- TAB: EMISSIONE -->
+<div id="tab-emissione" class="tab-panel active">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Dati Generali</div>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="field">
+          <label>Editore / Fornitore</label>
+          <select id="sel-editore" onchange="onEditoreChange()">
+            <option value="">— Seleziona —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Prezzo per Lead (€)</label>
+          <input type="number" id="inp-prezzo" step="0.001" placeholder="0.070" readonly
+            style="background:var(--bg2); cursor:not-allowed;" />
+        </div>
+        <div class="field">
+          <label>Data Import Lista</label>
+          <input type="date" id="inp-data" onchange="refreshAllPreviews()" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Sub per Agenzia</div>
+
+  <div id="agenzie-blocks" class="agenzie-grid"></div>
+
+  <div class="card" style="margin-top:8px;">
+    <div class="card-body">
+      <div class="field" style="margin-bottom:16px;">
+        <label>Note (opzionale)</label>
+        <textarea id="inp-note" placeholder="Eventuali note o modifiche..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="emettiRighe()">▶ Emetti Righe Fattura</button>
+        <button class="btn btn-outline" onclick="resetEmissione()">Azzera</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: RIGHE -->
+<div id="tab-righe" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Righe Emesse</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <div class="filter-row">
+          <button class="f-btn active" onclick="setFilter('all',this)">Tutte</button>
+          <button class="f-btn" onclick="setFilter('inv',this)">Inviate</button>
+          <button class="f-btn" onclick="setFilter('att',this)">In Attesa</button>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ CSV</button>
+        <button class="btn btn-outline btn-sm" onclick="exportJSON()">⬇ JSON</button>
+        <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 Cancella Tutto</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Data</th>
+              <th>Editore</th>
+              <th>Agenzia</th>
+              <th>Sub</th>
+              <th>€/Lead</th>
+              <th>Totale</th>
+              <th>Codice Lista</th>
+              <th>Inviata</th>
+              <th>N° Fattura</th>
+              <th>Note</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="righe-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="totale-bar">
+    <div>
+      <div class="totale-label">Totale Complessivo senza IVA</div>
+      <div class="totale-iva" id="totale-iva">IVA 22%: <span id="tot-iva-val">€ 0.00</span></div>
+    </div>
+    <div class="totale-val" id="totale-gen">€ 0.00</div>
+  </div>
+</div>
+
+<!-- TAB: CONFIG -->
+<div id="tab-config" class="tab-panel">
+
+  <!-- Editori -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-header">
+      <div class="card-title">Editori / Fornitori</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('editore')">+ Aggiungi</button>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>Prezzo Lead (€)</th><th>Aggiunto il</th><th></th></tr>
+          </thead>
+          <tbody id="editori-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agenzie -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Sub-Agenzie</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('agenzia')">+ Aggiungi</button>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nome Agenzia</th><th>Codice Tag</th><th></th></tr>
+          </thead>
+          <tbody id="agenzie-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Aggiungi</div>
+    <div id="modal-body"></div>
+    <div class="btn-row" style="margin-top:20px;">
+      <button class="btn btn-primary" id="modal-confirm">Salva</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG — cambia se il backend gira su porta diversa
+// ══════════════════════════════════════════════
+const API = ''; // stesso origin (serve i file dalla /public)
+// Se apri index.html direttamente senza server usa:
+// const API = 'http://[IP-NAS]:3000';
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let editori  = [];
+let agenzie  = [];
+let righe    = [];
+let subValues = {}; // { agenzia_id: valore }
+let codiceValues = {}; // { agenzia_id: codice lista manuale }
+let currentFilter = 'all';
+
+// ══════════════════════════════════════════════
+// API HELPERS
+// ══════════════════════════════════════════════
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error || r.statusText); }
+  return r.json();
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+async function init() {
+  await Promise.all([loadEditori(), loadAgenzie(), loadRighe()]);
+  document.getElementById('inp-data').value = new Date().toISOString().slice(0,10);
+}
+
+// ══════════════════════════════════════════════
+// EDITORI
+// ══════════════════════════════════════════════
+async function loadEditori() {
+  editori = await api('GET', '/api/editori');
+  renderEditoriSelect();
+  renderEditoriTable();
+}
+
+function renderEditoriSelect() {
+  const sel = document.getElementById('sel-editore');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Seleziona —</option>';
+  editori.forEach(e => {
+    const o = document.createElement('option');
+    o.value = e.id;
+    o.textContent = `${e.nome} (€ ${e.prezzo_lead.toFixed(3)})`;
+    if (e.id == cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function renderEditoriTable() {
+  const tb = document.getElementById('editori-tbody');
+  if (!editori.length) {
+    tb.innerHTML = `<tr><td colspan="4"><div class="empty">Nessun editore configurato</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = editori.map(e => `
+    <tr class="animate">
+      <td class="td-main">${e.nome}</td>
+      <td class="td-money">€ ${e.prezzo_lead.toFixed(3)}</td>
+      <td style="color:var(--ink3); font-size:12px;">${fmtDate(e.created_at?.slice(0,10))}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteEditore(${e.id})">Elimina</button></td>
+    </tr>
+  `).join('');
+}
+
+function onEditoreChange() {
+  const id = document.getElementById('sel-editore').value;
+  const e = editori.find(x => x.id == id);
+  const inp = document.getElementById('inp-prezzo');
+  inp.value = e ? e.prezzo_lead.toFixed(3) : '';
+  refreshAllPreviews();
+}
+
+async function deleteEditore(id) {
+  if (!confirm('Eliminare questo editore?')) return;
+  await api('DELETE', `/api/editori/${id}`);
+  await loadEditori();
+  showToast('🗑 Editore eliminato');
+}
+
+// ══════════════════════════════════════════════
+// AGENZIE
+// ══════════════════════════════════════════════
+async function loadAgenzie() {
+  agenzie = await api('GET', '/api/agenzie');
+  renderAgenzieBlocks();
+  renderAgenzieTable();
+}
+
+function renderAgenzieBlocks() {
+  const container = document.getElementById('agenzie-blocks');
+  container.innerHTML = '';
+  agenzie.forEach(ag => {
+    const sub = subValues[ag.id] || '';
+    const prezzo = parseFloat(document.getElementById('inp-prezzo')?.value) || 0;
+    const data = document.getElementById('inp-data')?.value || '';
+    const editore = editori.find(e => e.id == document.getElementById('sel-editore')?.value);
+    const totale = sub && prezzo ? '€ ' + (sub * prezzo).toFixed(2) : '—';
+    const codice = buildCodice(sub, ag.codice_tag, editore?.nome || '', data);
+    // usa il valore manuale se già inserito, altrimenti il suggerimento automatico
+    const codiceVal = codiceValues[ag.id] !== undefined ? codiceValues[ag.id] : (codice || '');
+
+    const div = document.createElement('div');
+    div.className = 'ag-block';
+    div.innerHTML = `
+      <div class="ag-block-head">
+        <div class="ag-name">${ag.nome}</div>
+        <div class="ag-preview-total" id="ag-tot-${ag.id}">${totale}</div>
+      </div>
+      <div class="field">
+        <label>Sub (quantità lead)</label>
+        <input type="number" value="${sub}" placeholder="es. 10000"
+          oninput="subValues[${ag.id}]=this.value; refreshPreview(${ag.id})" />
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label style="display:flex; align-items:center; justify-content:space-between;">
+          <span>Codice Lista</span>
+          <span style="font-size:10px; color:var(--ink3); font-weight:400; text-transform:none; letter-spacing:0;">modificabile manualmente</span>
+        </label>
+        <input type="text" id="ag-cod-${ag.id}" value="${codiceVal}"
+          placeholder="es. 1_10000_ICALL1_TTP_24022026"
+          style="font-family:'DM Mono',monospace; font-size:11px;"
+          oninput="codiceValues[${ag.id}]=this.value" />
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function refreshPreview(agId) {
+  const ag = agenzie.find(a => a.id == agId);
+  if (!ag) return;
+  const sub = parseInt(subValues[agId]) || 0;
+  const prezzo = parseFloat(document.getElementById('inp-prezzo').value) || 0;
+  const data = document.getElementById('inp-data').value;
+  const editore = editori.find(e => e.id == document.getElementById('sel-editore').value);
+  const totale = sub && prezzo ? '€ ' + (sub * prezzo).toFixed(2) : '—';
+  const te = document.getElementById(`ag-tot-${agId}`);
+  if (te) te.textContent = totale;
+
+  // aggiorna il codice solo se l'utente NON lo ha modificato manualmente
+  if (codiceValues[agId] === undefined) {
+    const codice = buildCodice(sub, ag.codice_tag, editore?.nome || '', data);
+    const ce = document.getElementById(`ag-cod-${agId}`);
+    if (ce) ce.value = codice || '';
+  }
+}
+
+function refreshAllPreviews() {
+  agenzie.forEach(ag => refreshPreview(ag.id));
+}
+
+function refreshAllPreviews() { agenzie.forEach(ag => refreshPreview(ag.id)); }
+
+function renderAgenzieTable() {
+  const tb = document.getElementById('agenzie-tbody');
+  if (!agenzie.length) {
+    tb.innerHTML = `<tr><td colspan="3"><div class="empty">Nessuna agenzia configurata</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = agenzie.map(ag => `
+    <tr class="animate">
+      <td class="td-main">${ag.nome}</td>
+      <td style="font-family:'DM Mono',monospace; font-size:12px; color:var(--ink2);">${ag.codice_tag}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteAgenzia(${ag.id})">Elimina</button></td>
+    </tr>
+  `).join('');
+}
+
+async function deleteAgenzia(id) {
+  if (!confirm('Eliminare questa agenzia?')) return;
+  await api('DELETE', `/api/agenzie/${id}`);
+  await loadAgenzie();
+  showToast('🗑 Agenzia eliminata');
+}
+
+// ══════════════════════════════════════════════
+// RIGHE
+// ══════════════════════════════════════════════
+async function loadRighe() {
+  righe = await api('GET', '/api/righe');
+  renderRighe();
+  updateStats();
+}
+
+function renderRighe() {
+  const tb = document.getElementById('righe-tbody');
+  let filtered = righe;
+  if (currentFilter === 'inv') filtered = righe.filter(r => r.inviata);
+  if (currentFilter === 'att') filtered = righe.filter(r => !r.inviata);
+
+  if (!filtered.length) {
+    tb.innerHTML = `<tr><td colspan="12"><div class="empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <div>Nessuna riga trovata</div>
+    </div></td></tr>`;
+    updateTotale(filtered);
+    return;
+  }
+
+  tb.innerHTML = filtered.map((r, i) => `
+    <tr class="animate">
+      <td style="color:var(--ink3); font-size:12px;">${i+1}</td>
+      <td>${fmtDate(r.data_import)}</td>
+      <td class="td-main">${r.editore}</td>
+      <td style="font-weight:600; color:var(--accent);">${r.agenzia}</td>
+      <td>${Number(r.sub).toLocaleString('it-IT')}</td>
+      <td style="font-family:'DM Mono',monospace; font-size:12px;">€ ${Number(r.prezzo_lead).toFixed(3)}</td>
+      <td class="td-money">€ ${Number(r.totale).toLocaleString('it-IT',{minimumFractionDigits:2})}</td>
+      <td class="td-code">${r.codice_lista}</td>
+      <td>
+        <label class="check-wrap" style="cursor:pointer;">
+          <input type="checkbox" ${r.inviata ? 'checked' : ''}
+            onchange="patchRiga(${r.id}, {inviata: this.checked})" />
+          <span class="badge ${r.inviata ? 'badge-green' : 'badge-amber'}">
+            <span class="badge-dot"></span>${r.inviata ? 'Inviata' : 'In attesa'}
+          </span>
+        </label>
+      </td>
+      <td>
+        <input class="inline-in" type="text" value="${r.num_fattura || ''}" placeholder="N° fattura"
+          onchange="patchRiga(${r.id}, {num_fattura: this.value})" />
+      </td>
+      <td>
+        <input class="inline-in" type="text" value="${r.note || ''}" placeholder="Note..."
+          onchange="patchRiga(${r.id}, {note: this.value})" style="min-width:140px;" />
+      </td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="deleteRiga(${r.id})">✕</button>
+      </td>
+    </tr>
+  `).join('');
+
+  updateTotale(filtered);
+}
+
+function updateTotale(rows) {
+  const sum = rows.reduce((a, r) => a + Number(r.totale), 0);
+  document.getElementById('totale-gen').textContent = '€ ' + sum.toLocaleString('it-IT', {minimumFractionDigits:2});
+  document.getElementById('tot-iva-val').textContent = '€ ' + (sum * 1.22).toLocaleString('it-IT', {minimumFractionDigits:2});
+}
+
+function updateStats() {
+  document.getElementById('s-emesse').textContent = righe.length;
+  document.getElementById('s-inviate').textContent = righe.filter(r => r.inviata).length;
+  document.getElementById('s-attesa').textContent = righe.filter(r => !r.inviata).length;
+  const tot = righe.reduce((a,r) => a + Number(r.totale), 0);
+  document.getElementById('s-totale').textContent = '€ ' + tot.toLocaleString('it-IT', {minimumFractionDigits:2});
+}
+
+async function patchRiga(id, data) {
+  await api('PATCH', `/api/righe/${id}`, data);
+  const r = righe.find(x => x.id == id);
+  if (r) Object.assign(r, data);
+  updateStats();
+}
+
+async function deleteRiga(id) {
+  if (!confirm('Eliminare questa riga?')) return;
+  await api('DELETE', `/api/righe/${id}`);
+  righe = righe.filter(r => r.id != id);
+  renderRighe(); updateStats();
+  showToast('🗑 Riga eliminata');
+}
+
+async function clearAll() {
+  if (!confirm('Eliminare TUTTE le righe? L\'operazione non è reversibile.')) return;
+  await api('DELETE', '/api/righe');
+  righe = []; renderRighe(); updateStats();
+  showToast('🗑 Tutte le righe eliminate');
+}
+
+// ══════════════════════════════════════════════
+// EMISSIONE
+// ══════════════════════════════════════════════
+function buildCodice(sub, tag, editore, data) {
+  if (!sub || !tag || !editore || !data) return '';
+  const d = new Date(data);
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  return `1_${sub}_${tag}_${editore}_${dd}${mm}${yy}`;
+}
+
+async function emettiRighe() {
+  const editoreId = document.getElementById('sel-editore').value;
+  const prezzo = parseFloat(document.getElementById('inp-prezzo').value);
+  const data = document.getElementById('inp-data').value;
+  const note = document.getElementById('inp-note').value.trim();
+  const editore = editori.find(e => e.id == editoreId);
+
+  if (!editore || isNaN(prezzo) || !data) {
+    showToast('⚠ Seleziona editore e data import!'); return;
+  }
+
+  const rows = [];
+  for (const ag of agenzie) {
+    const sub = parseInt(subValues[ag.id]);
+    if (!sub || sub <= 0) continue;
+    const totale = parseFloat((sub * prezzo).toFixed(2));
+    // legge il codice dal campo input (manuale o auto-generato)
+    const codiceInput = document.getElementById(`ag-cod-${ag.id}`);
+    const codice = codiceInput ? codiceInput.value.trim() : buildCodice(sub, ag.codice_tag, editore.nome, data);
+    if (!codice) { showToast(`⚠ Inserisci il Codice Lista per ${ag.nome}!`); return; }
+    rows.push({ data_import: data, editore: editore.nome, prezzo_lead: prezzo, agenzia: ag.nome, sub, totale, codice_lista: codice, note });
+  }
+
+  if (!rows.length) { showToast('⚠ Inserisci almeno un valore Sub!'); return; }
+
+  await api('POST', '/api/righe', { righe: rows });
+  await loadRighe();
+  subValues = {};
+  codiceValues = {};
+  document.getElementById('inp-note').value = '';
+  renderAgenzieBlocks();
+  showToast(`✓ ${rows.length} riga${rows.length > 1 ? 'e emesse' : ' emessa'}!`);
+  switchTab('righe', document.querySelectorAll('.tab')[1]);
+}
+
+function resetEmissione() {
+  document.getElementById('sel-editore').value = '';
+  document.getElementById('inp-prezzo').value = '';
+  document.getElementById('inp-data').value = new Date().toISOString().slice(0,10);
+  document.getElementById('inp-note').value = '';
+  subValues = {};
+  renderAgenzieBlocks();
+}
+
+// ══════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════
+function exportCSV() { window.location.href = API + '/api/export/csv'; }
+function exportJSON() { window.location.href = API + '/api/export/json'; }
+
+// ══════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════
+let modalType = '';
+
+function openModal(type) {
+  modalType = type;
+  const overlay = document.getElementById('modal-overlay');
+  const title = document.getElementById('modal-title');
+  const body = document.getElementById('modal-body');
+
+  if (type === 'editore') {
+    title.textContent = 'Aggiungi Editore / Fornitore';
+    body.innerHTML = `
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="field"><label>Nome / Sigla</label>
+          <input type="text" id="m-nome" placeholder="es. TTP" /></div>
+        <div class="field"><label>Prezzo per Lead (€)</label>
+          <input type="number" id="m-prezzo" step="0.001" placeholder="0.070" /></div>
+      </div>`;
+    document.getElementById('modal-confirm').onclick = saveEditore;
+  } else {
+    title.textContent = 'Aggiungi Sub-Agenzia';
+    body.innerHTML = `
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="field"><label>Nome Agenzia</label>
+          <input type="text" id="m-agnome" placeholder="es. Starcall" /></div>
+        <div class="field"><label>Codice Tag</label>
+          <input type="text" id="m-tag" placeholder="es. ICALL4" /></div>
+      </div>`;
+    document.getElementById('modal-confirm').onclick = saveAgenzia;
+  }
+
+  overlay.classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+async function saveEditore() {
+  const nome = document.getElementById('m-nome').value.trim();
+  const prezzo_lead = parseFloat(document.getElementById('m-prezzo').value);
+  if (!nome || isNaN(prezzo_lead)) { showToast('⚠ Compila tutti i campi!'); return; }
+  await api('POST', '/api/editori', { nome, prezzo_lead });
+  await loadEditori();
+  closeModal();
+  showToast('✓ Editore aggiunto!');
+}
+
+async function saveAgenzia() {
+  const nome = document.getElementById('m-agnome').value.trim();
+  const codice_tag = document.getElementById('m-tag').value.trim().toUpperCase();
+  if (!nome || !codice_tag) { showToast('⚠ Compila tutti i campi!'); return; }
+  try {
+    await api('POST', '/api/agenzie', { nome, codice_tag });
+    await loadAgenzie();
+    closeModal();
+    showToast('✓ Agenzia aggiunta!');
+  } catch(e) {
+    showToast('⚠ ' + e.message);
+  }
+}
+
+// ══════════════════════════════════════════════
+// TABS & FILTERS
+// ══════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'righe') renderRighe();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRighe();
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,dd] = d.slice(0,10).split('-');
+  return `${dd}/${m}/${y}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════
+init().catch(err => {
+  document.body.innerHTML = `
+    <div style="font-family:monospace; padding:40px; max-width:600px; margin:0 auto;">
+      <h2 style="color:#c0392b; margin-bottom:12px;">⚠ Backend non raggiungibile</h2>
+      <p style="color:#555; line-height:1.6;">
+        L'app necessita del backend Node.js per funzionare.<br><br>
+        <b>Sul NAS Synology:</b><br>
+        1. Installa Node.js dal Package Center<br>
+        2. Carica la cartella <code>fatture-app</code> sul NAS<br>
+        3. SSH → <code>cd /volume1/web/fatture-app && npm install && node server.js</code><br>
+        4. Apri <code>http://[IP-NAS]:3000</code>
+      </p>
+      <p style="color:#999; margin-top:16px; font-size:12px;">Errore tecnico: ${err.message}</p>
+    </div>`;
+});
+</script>
+</body>
+</html>
